@@ -15,7 +15,7 @@ jobs:
         include: [
           { msystem: MINGW64, runner: windows-2022 },
           { msystem: MINGW32, runner: windows-2022 },
-          { msystem: CLANGARM64, runner: ['Windows', 'ARM64', 'CI'] }
+        # { msystem: CLANGARM64, runner: ['Windows', 'ARM64', 'CI'] }
         ]
     name: ${{ matrix.msystem }}
     runs-on: ${{ matrix.runner }}
@@ -40,7 +40,7 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-cc patch
     - name: Build packages
       run: |
-        for p in freetype harfbuzz libass ffmpeg mpv libwebp; do
+        for p in freetype harfbuzz libass ffmpeg mpv libwebp curl; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
