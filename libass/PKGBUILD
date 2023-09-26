@@ -7,7 +7,7 @@ pkgver=0.17.1
 pkgrel=1
 pkgdesc="A portable library for SSA/ASS subtitles rendering (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64')
+mingw_arch=('mingw32' 'mingw64' 'clangarm64')
 url='https://github.com/libass/libass'
 license=('spdx:ISC')
 makedepends=(
@@ -36,9 +36,6 @@ build() {
   CPPFLAGS+=" -DFRIBIDI_LIB_STATIC" \
   ${srcdir}/${_realname}-${pkgver}/configure \
     --prefix=${MINGW_PREFIX} \
-    --build=${MINGW_CHOST} \
-    --host=${MINGW_CHOST} \
-    --target=${MINGW_CHOST} \
     --disable-shared \
     --enable-static
   make

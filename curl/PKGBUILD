@@ -7,7 +7,7 @@ pkgver=7.88.1
 pkgrel=1
 pkgdesc="library for transferring data with URLs (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64')
+mingw_arch=('mingw32' 'mingw64' 'clangarm64')
 url="https://curl.se/"
 license=("spdx:MIT")
 makedepends=(
@@ -32,7 +32,7 @@ build() {
       -DBUILD_SHARED_LIBS=ON \
       -DHTTP_ONLY=ON \
       -DCURL_USE_MBEDTLS=ON \
-      -DCURL_DISABLE_PROGRESS_METER=OFF \
+      -DCURL_DISABLE_PROGRESS_METER=ON \
       -DBUILD_CURL_EXE=OFF \
       -DBUILD_TESTING=OFF \
       -DUSE_LIBIDN2=OFF \
@@ -51,7 +51,7 @@ build() {
       -DZLIB_USE_STATIC_LIBS=ON \
       -DHTTP_ONLY=ON \
       -DCURL_USE_MBEDTLS=ON \
-      -DCURL_DISABLE_PROGRESS_METER=OFF \
+      -DCURL_DISABLE_PROGRESS_METER=ON \
       -DBUILD_CURL_EXE=OFF \
       -DBUILD_TESTING=OFF \
       -DUSE_LIBIDN2=OFF \

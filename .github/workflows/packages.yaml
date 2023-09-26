@@ -9,9 +9,18 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [
+          { msystem: MINGW64, runner: windows-2022 },
+          { msystem: MINGW32, runner: windows-2022 },
+          { msystem: CLANGARM64, runner: ['Windows', 'ARM64', 'CI'] }
+        ]
+    name: ${{ matrix.msystem }}
+    runs-on: ${{ matrix.runner }}
     env:
-      MSYSTEM: MINGW64
+      MSYSTEM: ${{ matrix.msystem }}
     defaults:
       run:
         shell: C:\shells\msys2bash.cmd {0}
@@ -31,16 +40,16 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-cc patch
     - name: Build packages
       run: |
-        for p in freetype harfbuzz libass libwebp ffmpeg mpv curl; do
+        for p in freetype harfbuzz libass ffmpeg mpv libwebp; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
     - name: Upload packages
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ env.MSYSTEM }}
-        tag_name: ${{ env.MSYSTEM }}
+        name: ${{ matrix.msystem }}
+        tag_name: ${{ matrix.msystem }}
         prerelease: true
         files: "*/*.pkg.tar.zst"
         body: |
-          ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ env.MSYSTEM }}/total?label=Downloads)
+          ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)
