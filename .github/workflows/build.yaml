@@ -40,7 +40,7 @@ jobs:
         rm -f ${MINGW_PREFIX}/lib/liblua5.1.dll.a  
     - name: Build packages
       run: |
-        for p in freetype harfbuzz libass ffmpeg mpv; do
+        for p in curl libwebp freetype harfbuzz libass ffmpeg spirv-cross shaderc mpv; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
