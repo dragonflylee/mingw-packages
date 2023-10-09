@@ -1,0 +1,53 @@
+# Maintainer: J. Peter Mugaas <jpmugaas@suddenlink.net>
+# Contributor: Biswapriyo Nath <nathbappai@gmail.com>
+
+_realname=spirv-tools
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+epoch=3
+pkgver=1.3.261.1
+pkgrel=1
+pkgdesc="API and commands for processing SPIR-V modules (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'clang64' 'clangarm64')
+url="https://www.khronos.org/vulkan/"
+license=('spdx:Apache-2.0')
+groups=("${MINGW_PACKAGE_PREFIX}-vulkan-devel")
+depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs")
+makedepends=(
+  "${MINGW_PACKAGE_PREFIX}-cc"
+  "${MINGW_PACKAGE_PREFIX}-cmake"
+  "${MINGW_PACKAGE_PREFIX}-ninja"
+  "${MINGW_PACKAGE_PREFIX}-python"
+  "${MINGW_PACKAGE_PREFIX}-spirv-headers"
+)
+source=("${_realname}-${pkgver}.tar.gz::https://github.com/KhronosGroup/SPIRV-Tools/archive/sdk-${pkgver}.tar.gz")
+sha256sums=('ead95c626ad482882a141d1aa0ce47b9453871f72c42c0b28d39c82f60a52008')
+
+build() {
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    ${MINGW_PREFIX}/bin/cmake.exe -B "build-${MSYSTEM}" -G Ninja \
+      -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DSPIRV_WERROR=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DSPIRV_SKIP_EXECUTABLES=ON \
+      -DSPIRV_SKIP_TESTS=ON \
+      -DSPIRV-Headers_SOURCE_DIR=${MINGW_PREFIX} \
+      -DPython3_EXECUTABLE=${MINGW_PREFIX}/bin/python \
+      "${srcdir}/SPIRV-Tools-sdk-${pkgver}"
+
+  ${MINGW_PREFIX}/bin/cmake.exe --build "build-${MSYSTEM}"
+}
+
+package() {
+  DESTDIR="${pkgdir}" ${MINGW_PREFIX}/bin/cmake.exe --install "build-${MSYSTEM}"
+
+  install -dm755 "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}"
+  install -m644 ${srcdir}/SPIRV-Tools-sdk-${pkgver}/LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/"
+
+  local _WIN_PREFIX=$(cygpath -am ${MINGW_PREFIX})
+  for _f in "${pkgdir}${MINGW_PREFIX}"/lib/pkgconfig/*.pc; do
+    sed -e "s|${_WIN_PREFIX}|${MINGW_PREFIX}|g" -i ${_f}
+  done
+}
