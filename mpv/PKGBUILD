@@ -19,17 +19,19 @@ makedepends=(
   "${MINGW_PACKAGE_PREFIX}-ffmpeg"
   "${MINGW_PACKAGE_PREFIX}-libass"
   "${MINGW_PACKAGE_PREFIX}-libplacebo"
+  "${MINGW_PACKAGE_PREFIX}-shaderc"
+  "${MINGW_PACKAGE_PREFIX}-spirv-cross"
 )
 options=('strip')
 source=(
   "${_realname}-${pkgver}.tar.gz"::"https://github.com/mpv-player/${_realname}/archive/v${pkgver}.tar.gz"
-  "0001-fix-compile-wasapi.patch"
+  "0001-d3d11-render.patch"
 )
 sha256sums=('1d2d4adbaf048a2fa6ee134575032c4b2dad9a7efafd5b3e69b88db935afaddf' 'SKIP')
 
 prepare() {
   cd "${srcdir}/${_realname}-${pkgver}"
-  patch -Nbp1 -i "${srcdir}/0001-fix-compile-wasapi.patch"
+  patch -Nbp1 -i "${srcdir}/0001-d3d11-render.patch"
 }
 
 build() {
@@ -50,8 +52,7 @@ build() {
       -Dtests=false \
       -Dgl-win32=disabled \
       -Degl-angle-lib=disabled \
-      -Dshaderc=disabled \
-      -Dspirv-cross=disabled \
+      -Dd3d11=enabled \
       -Dlibarchive=disabled \
       -Dlua=disabled \
       "build-${MSYSTEM}" \
@@ -61,8 +62,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/build-${MSYSTEM}"
-  meson install --destdir "${pkgdir}"
+  meson install -C "build-${MSYSTEM}" --destdir "${pkgdir}"
 
   sed -s "/private/d" -i ${pkgdir}${MINGW_PREFIX}/lib/pkgconfig/mpv.pc
   sed -s "s|$(cygpath -am ${MINGW_PREFIX})|${MINGW_PREFIX}|g" -i ${pkgdir}${MINGW_PREFIX}/lib/pkgconfig/mpv.pc

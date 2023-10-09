@@ -38,7 +38,7 @@ jobs:
 
     - name: Build packages
       run: |
-        for p in freetype harfbuzz libass ffmpeg libplacebo mpv; do
+        for p in freetype harfbuzz libass ffmpeg spirv-cross shaderc libplacebo mpv; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
