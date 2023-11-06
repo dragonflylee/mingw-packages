@@ -22,6 +22,7 @@ depends=(
 makedepends=(
   "${MINGW_PACKAGE_PREFIX}-meson"
   "${MINGW_PACKAGE_PREFIX}-ninja"
+  "${MINGW_PACKAGE_PREFIX}-pkgconf"
   "${MINGW_PACKAGE_PREFIX}-cc"
 )
 options=('staticlibs' '!strip')

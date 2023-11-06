@@ -1,4 +1,4 @@
-name: mingw-packages
+name: build
 
 on:
   push:
@@ -12,14 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: [
-        # { msystem: MINGW64, runner: windows-2022 },
-        # { msystem: MINGW32, runner: windows-2022 },
-          { msystem: CLANG64, runner: windows-2022 },
-        # { msystem: CLANGARM64, runner: ['Windows', 'ARM64', 'CI'] }
-        ]
+        msystem: [ MINGW64, MINGW32, CLANG64 ]
     name: ${{ matrix.msystem }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: windows-2019
     env:
       MSYSTEM: ${{ matrix.msystem }}
     defaults:
@@ -32,7 +27,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install dependency
       run: |
-        pacman -S --noconfirm --noprogressbar \
+        pacman -S --needed --noconfirm --noprogressbar \
           ${MINGW_PACKAGE_PREFIX}-make \
           ${MINGW_PACKAGE_PREFIX}-autotools \
           ${MINGW_PACKAGE_PREFIX}-cmake \
@@ -41,7 +36,7 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-cc patch
     - name: Build packages
       run: |
-        for p in freetype harfbuzz libass ffmpeg mpv libwebp curl; do
+        for p in curl libwebp freetype harfbuzz libass ffmpeg mpv; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
@@ -51,6 +46,9 @@ jobs:
         name: ${{ matrix.msystem }}
         tag_name: ${{ matrix.msystem }}
         prerelease: true
-        files: "*/*.pkg.tar.zst"
+        files: |
+          mpv/*.pkg.tar.zst
+          curl/*.pkg.tar.zst
+          libwebp/*.pkg.tar.zst
         body: |
           ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)

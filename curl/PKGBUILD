@@ -3,7 +3,7 @@
 _realname=curl
 pkgbase=mingw-w64-${_realname}
 pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}
-pkgver=7.88.1
+pkgver=8.4.0
 pkgrel=1
 pkgdesc="library for transferring data with URLs (mingw-w64)"
 arch=('any')
@@ -23,7 +23,7 @@ source=(
   "0004-more-static-fixes.patch"
 )
 sha256sums=(
-  '1dae31b2a7c1fe269de99c0c31bb488346aab3459b5ffca909d6938249ae415f'
+  '16c62a9c4af0f703d28bda6d7bbf37ba47055ad3414d70dec63e2e6336f2a82d'
   'SKIP' 'SKIP'
 )
 
@@ -36,23 +36,6 @@ prepare() {
 }
 
 build() {
-  extra_config=(
-    --disable-dict
-    --disable-file
-    --disable-ftp
-    --disable-gopher
-    --disable-imap
-    --disable-ldap
-    --disable-ldaps
-    --disable-mqtt
-    --disable-pop3
-    --disable-rtsp
-    --disable-smb
-    --disable-smtp
-    --disable-telnet
-    --disable-tftp
-  )
-
   mkdir -p "${srcdir}/build-${MSYSTEM}" && cd "${srcdir}/build-${MSYSTEM}"
   ${srcdir}/${_realname}-${pkgver}/configure \
     --prefix=${MINGW_PREFIX} \
@@ -73,7 +56,20 @@ build() {
     --without-libidn2 \
     --without-nghttp2 \
     --with-winidn=${MINGW_PREFIX} \
-    "${extra_config[@]}"
+    --disable-dict \
+    --disable-file \
+    --disable-ftp \
+    --disable-gopher \
+    --disable-imap \
+    --disable-ldap \
+    --disable-ldaps \
+    --disable-mqtt \
+    --disable-pop3 \
+    --disable-rtsp \
+    --disable-smb \
+    --disable-smtp \
+    --disable-telnet \
+    --disable-tftp
   make -j4
 }
 
