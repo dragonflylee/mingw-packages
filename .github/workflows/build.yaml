@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "gl" ]
 
 permissions:
   contents: write
@@ -33,10 +33,14 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-cmake \
           ${MINGW_PACKAGE_PREFIX}-ninja \
           ${MINGW_PACKAGE_PREFIX}-meson \
+          ${MINGW_PACKAGE_PREFIX}-lua51 \
+          ${MINGW_PACKAGE_PREFIX}-angleproject \
           ${MINGW_PACKAGE_PREFIX}-cc patch
+
+        rm -f ${MINGW_PREFIX}/lib/liblua5.1.dll.a  
     - name: Build packages
       run: |
-        for p in curl libwebp freetype harfbuzz libass ffmpeg mpv; do
+        for p in freetype harfbuzz libass ffmpeg mpv; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
@@ -46,9 +50,6 @@ jobs:
         name: ${{ matrix.msystem }}
         tag_name: ${{ matrix.msystem }}
         prerelease: true
-        files: |
-          mpv/*.pkg.tar.zst
-          curl/*.pkg.tar.zst
-          libwebp/*.pkg.tar.zst
+        files: mpv/*.pkg.tar.zst
         body: |
           ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)

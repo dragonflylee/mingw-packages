@@ -35,8 +35,10 @@ build() {
       -Dcplayer=false \
       -Dtests=false \
       -Dplain-gl=enabled \
+      -Degl-angle=enabled \
+      -Degl-angle-lib=disabled \
       -Dlibarchive=disabled \
-      -Dlua=disabled \
+      -Dlua=enabled \
       "build-${MSYSTEM}" \
       "${srcdir}/${_realname}-${pkgver}"
 
