@@ -25,7 +25,7 @@ sha256sums=('29abc44f8ebee013bb2f9fe14d80b30db19b534c679056e4851ceadf5a5e8bf6')
 
 build() {
   MSYS2_ARG_CONV_EXCL="--prefix=" \
-  LDFLAGS="-static-libgcc -static-libstdc++ -static" \
+  LDFLAGS="-static-libgcc -static" \
     meson setup \
       --prefix="${MINGW_PREFIX}" \
       --buildtype=release \
