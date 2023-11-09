@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ "dev", "gl" ]
+    branches: [ "dev", "gl", "uwp" ]
 
 permissions:
   contents: write
@@ -33,20 +33,16 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-cmake \
           ${MINGW_PACKAGE_PREFIX}-ninja \
           ${MINGW_PACKAGE_PREFIX}-meson \
-          ${MINGW_PACKAGE_PREFIX}-lua51 \
-          ${MINGW_PACKAGE_PREFIX}-angleproject \
           ${MINGW_PACKAGE_PREFIX}-cc patch p7zip
-
-        rm -f ${MINGW_PREFIX}/lib/liblua5.1.dll.a  
     - name: Build packages
       run: |
-        for p in curl libwebp freetype harfbuzz libass ffmpeg spirv-cross shaderc mpv; do
+        for p in freetype harfbuzz libass ffmpeg spirv-cross shaderc mpv; do
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
 
         cd ${MINGW_PREFIX}
-        7z a -mx=9 ${GITHUB_WORKSPACE}/mpv-dev-${MSYSTEM_CARCH}.7z include/mpv \
+        7z a -mx=9 ${GITHUB_WORKSPACE}/mpv-dev-uwp-${MSYSTEM_CARCH}.7z include/mpv \
           ${MINGW_PREFIX}/bin/libmpv-2.dll \
           ${MINGW_PREFIX}/lib/libmpv.dll.a \
           ${MINGW_PREFIX}/share/doc/mpv/mpv.def
@@ -57,8 +53,6 @@ jobs:
         name: ${{ matrix.msystem }}
         tag_name: ${{ matrix.msystem }}
         prerelease: true
-        files: |
-          */*.pkg.tar.zst
-          mpv-*.7z
+        files: mpv-*.7z
         body: |
           ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)

@@ -56,20 +56,41 @@ index 0000000000..5614cc99d9
 +#endif
 +#endif // MPV_CLIENT_API_RENDER_DXGI_H_
 diff --git a/meson.build b/meson.build
-index f9fe4e7263..75a3e500c3 100644
+index f9fe4e7263..fc0c0c44f3 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -980,7 +980,8 @@ d3d11 = get_option('d3d11').require(
+@@ -471,6 +471,8 @@ features += {'uwp': uwp.found()}
+ if features['uwp']
+     dependencies += uwp
+     sources += files('osdep/path-uwp.c')
++    sources += files('osdep/language-uwp.c')
++    sources += files('osdep/terminal-dummy.c')
+ endif
+ 
+ features += {'win32-executable': win32 and get_option('cplayer')}
+@@ -974,13 +976,18 @@ if features['spirv-cross']
+ endif
+ 
+ d3d11 = get_option('d3d11').require(
+-    features['win32-desktop'] and features['shaderc'] and features['spirv-cross'],
++    (features['win32-desktop'] or features['uwp']) and features['shaderc'] and features['spirv-cross'],
+     error_message: 'Either is not a win32 desktop or shaderc nor spirv-cross were found!',
+ )
  features += {'d3d11': d3d11.allowed()}
  if features['d3d11']
-     sources += files('video/out/d3d11/context.c',
+-    sources += files('video/out/d3d11/context.c',
 -                     'video/out/d3d11/ra_d3d11.c')
-+                     'video/out/d3d11/ra_d3d11.c',
-+                     'video/out/d3d11/libmpv_d3d11.c')
++    sources += files('video/out/d3d11/ra_d3d11.c')
++    sources += files('video/out/d3d11/libmpv_d3d11.c')
++    if features['win32-desktop']
++        sources += files('video/out/d3d11/context.c')
++    else
++        dependencies += cc.find_library('d3d11')
++    endif
  endif
  
  wayland = {
-@@ -1724,8 +1725,10 @@ if get_option('libmpv')
+@@ -1724,8 +1731,10 @@ if get_option('libmpv')
                   description: 'mpv media player client library')
  
      headers = ['libmpv/client.h', 'libmpv/render.h',
@@ -81,6 +102,55 @@ index f9fe4e7263..75a3e500c3 100644
  endif
  
  if get_option('cplayer')
+diff --git a/options/options.c b/options/options.c
+index 86e5a7b724..6e03471e27 100644
+--- a/options/options.c
++++ b/options/options.c
+@@ -810,7 +810,9 @@ static const m_option_t mp_opts[] = {
+ #endif
+ 
+ #if HAVE_D3D11
++#if HAVE_WIN32_DESKTOP
+     {"", OPT_SUBSTRUCT(d3d11_opts, d3d11_conf)},
++#endif
+ #if HAVE_D3D_HWACCEL
+     {"", OPT_SUBSTRUCT(d3d11va_opts, d3d11va_conf)},
+ #endif
+diff --git a/osdep/language-uwp.c b/osdep/language-uwp.c
+new file mode 100644
+index 0000000000..ed5760b411
+--- /dev/null
++++ b/osdep/language-uwp.c
+@@ -0,0 +1,29 @@
++/*
++ * User language lookup for UWP
++ *
++ * This file is part of mpv.
++ *
++ * mpv is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * mpv is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "misc/language.h"
++#include "mpv_talloc.h"
++#include "osdep/io.h"
++
++#include <windows.h>
++
++char **mp_get_user_langs(void)
++{
++    return NULL;
++}
 diff --git a/video/out/d3d11/libmpv_d3d11.c b/video/out/d3d11/libmpv_d3d11.c
 new file mode 100644
 index 0000000000..9059834745
@@ -175,6 +245,22 @@ index 0000000000..9059834745
 +    .destroy     = destroy,
 +};
 \ No newline at end of file
+diff --git a/video/out/gpu/context.c b/video/out/gpu/context.c
+index e41dd99476..19ea8cc733 100644
+--- a/video/out/gpu/context.c
++++ b/video/out/gpu/context.c
+@@ -60,9 +60,10 @@ extern const struct ra_ctx_fns ra_ctx_wldmabuf;
+ 
+ static const struct ra_ctx_fns *contexts[] = {
+ #if HAVE_D3D11
++#if HAVE_WIN32_DESKTOP
+     &ra_ctx_d3d11,
+ #endif
+-
++#endif
+ // OpenGL contexts:
+ #if HAVE_EGL_ANDROID
+     &ra_ctx_android,
 diff --git a/video/out/gpu/libmpv_gpu.c b/video/out/gpu/libmpv_gpu.c
 index aae1d18eed..bc65a73f7b 100644
 --- a/video/out/gpu/libmpv_gpu.c
