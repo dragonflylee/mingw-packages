@@ -34,7 +34,7 @@ jobs:
           ${MINGW_PACKAGE_PREFIX}-ninja \
           ${MINGW_PACKAGE_PREFIX}-meson \
           ${MINGW_PACKAGE_PREFIX}-angleproject \
-          ${MINGW_PACKAGE_PREFIX}-cc patch
+          ${MINGW_PACKAGE_PREFIX}-cc patch p7zip
 
     - name: Build packages
       run: |
@@ -42,12 +42,20 @@ jobs:
           echo building $p
           cd $p; makepkg-mingw -sciCf --noconfirm; cd ..
         done
+
+        cd ${MINGW_PREFIX}
+        7z a -mx=9 ${GITHUB_WORKSPACE}/mpv-dev-${{ github.run_id }}-${MSYSTEM_CARCH}.7z include/mpv \
+          ${MINGW_PREFIX}/bin/libmpv-2.dll \
+          ${MINGW_PREFIX}/lib/libmpv.dll.a \
+          ${MINGW_PREFIX}/share/doc/mpv/mpv.def
     - name: Upload packages
       uses: softprops/action-gh-release@v1
       with:
         name: ${{ matrix.msystem }}
         tag_name: ${{ matrix.msystem }}
         prerelease: true
-        files: mpv/*.pkg.tar.zst
+        files: |
+          mpv/*.pkg.tar.zst
+          mpv-*.7z
         body: |
           ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)
