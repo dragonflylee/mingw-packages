@@ -24,8 +24,13 @@ source=("${_realname}-${pkgver}.tar.gz"::"https://github.com/mpv-player/${_realn
 sha256sums=('29abc44f8ebee013bb2f9fe14d80b30db19b534c679056e4851ceadf5a5e8bf6')
 
 build() {
+  if [[ ${MSYSTEM} == CLANG* ]]; then
+    LDFLAGS="-lc++ -static-libgcc -static -lcrypt32"
+  else
+    LDFLAGS="-lstdc++ -static-libgcc -static-libstdc++ -static -lcrypt32"
+  fi
+
   MSYS2_ARG_CONV_EXCL="--prefix=" \
-  LDFLAGS="-static-libgcc -static" \
     meson setup \
       --prefix="${MINGW_PREFIX}" \
       --buildtype=release \
@@ -34,11 +39,10 @@ build() {
       -Dlibmpv=true \
       -Dcplayer=false \
       -Dtests=false \
-      -Dplain-gl=enabled \
-      -Degl-angle=enabled \
+      -Dgl-win32=disabled \
       -Degl-angle-lib=disabled \
       -Dlibarchive=disabled \
-      -Dlua=enabled \
+      -Dlua=disabled \
       "build-${MSYSTEM}" \
       "${srcdir}/${_realname}-${pkgver}"
 
