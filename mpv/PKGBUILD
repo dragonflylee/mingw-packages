@@ -20,8 +20,16 @@ makedepends=(
   "${MINGW_PACKAGE_PREFIX}-libass"
 )
 options=('strip')
-source=("${_realname}-${pkgver}.tar.gz"::"https://github.com/mpv-player/${_realname}/archive/v${pkgver}.tar.gz")
-sha256sums=('29abc44f8ebee013bb2f9fe14d80b30db19b534c679056e4851ceadf5a5e8bf6')
+source=(
+  "${_realname}-${pkgver}.tar.gz"::"https://github.com/mpv-player/${_realname}/archive/v${pkgver}.tar.gz"
+  "0001-fix-compile-wasapi.patch"
+)
+sha256sums=('29abc44f8ebee013bb2f9fe14d80b30db19b534c679056e4851ceadf5a5e8bf6' 'SKIP')
+
+prepare() {
+  cd "${srcdir}/${_realname}-${pkgver}"
+  patch -Nbp1 -i "${srcdir}/0001-fix-compile-wasapi.patch"
+}
 
 build() {
   if [[ ${MSYSTEM} == CLANG* ]]; then
