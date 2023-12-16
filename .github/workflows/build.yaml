@@ -48,6 +48,6 @@ jobs:
         name: ${{ matrix.msystem }}
         tag_name: ${{ matrix.msystem }}
         prerelease: true
-        files: mpv/*.pkg.tar.zst
+        files: "*/*.pkg.tar.zst"
         body: |
           ![download](https://img.shields.io/github/downloads/${{ github.repository }}/${{ matrix.msystem }}/total?label=Downloads)
